@@ -1,4 +1,5 @@
 # Project Name #
+FireBall
 
 <!-- 
 > This material was originally posted [here](http://www.quora.com/What-is-Amazons-approach-to-product-development-and-product-management). It is reproduced here for posterities sake.
@@ -21,24 +22,32 @@ Once the project moves into development, the press release can be used as a touc
 
 ## Sub-Heading ##
   > Describe who the market for the product is and what benefit they get. One sentence only underneath the title.
+  Fun for all.
 
 ## Summary ##
   > Give a summary of the product and the benefit. Assume the reader will not read anything else so make this paragraph good.
 
+  Multiplayer game where the objective is to avoid the deadly ball. Once strucked, you are out of the game, and the last one standing is the winner. //future features would be power ups that can shrink yourself for a few seconds, or enlarge everyone else. or go invincible for a few secs.
+
 ## Problem ##
   > Describe the problem your product solves.
-
+    The desire to play dodgeball in the convenient space of your own home.
 ## Solution ##
   > Describe how your product elegantly solves the problem.
-
+    Provides an outlet for individuals or groups to come together and play.
 ## Quote from You ##
   > A quote from a spokesperson in your company.
 
+  "Dodgeball has never been safer. With our game you can enjoy the thrill of being striked without the actual pain in your body. Warning: You may still experience the emotional suffering of losing."
 ## How to Get Started ##
   > Describe how easy it is to get started.
 
+  Just enter your name, find yourself in the game, and run away from the ball with the arrow keys.
 ## Customer Quote ##
   > Provide a quote from a hypothetical customer that describes how they experienced the benefit.
 
+  "Best way to spend your time on something completely useless but fun!"
+  -
 ## Closing and Call to Action ##
   > Wrap it up and give pointers where the reader should go next.
+  Go to this website and try it for yourself!
