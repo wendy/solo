@@ -43,12 +43,9 @@ $(function(){
 
  // PLAYERS DATA
   myDataRef.on('child_added', function(snapshot) {
-    console.log(snapshot.val())
     var player = snapshot.val();
     addPlayers(player.name, player.x, player.y, player.c);
   });
-
-  myDataRef.child('balls').push({})
 
   myDataRef.on('child_changed', function(snapshot) {
     var player = snapshot.val();
@@ -119,79 +116,101 @@ $(function(){
     });
 
   //BALLS
-    'use strict';
-      window.balls = [];
+'use strict';
+  window.balls = [];
 
-      var randomNumber = function(){ return Math.floor(Math.random() * 40) * 15}
-      var data = function(){
-        return [{
-          dx: 1,
-          dy: 1,
-          cx: randomNumber(),
-          cy: randomNumber()
-        }]
-      };
-      console.log(data);
-      var createElm = function(d) {
-        var self = this;
-        var elm = d3.select(this);
-        var newElm = board.append('circle').data(d).attr({
-          cx: function(d){ return d.cx },
-          cy: function(d){ return d.cy},
-          r: 10,
-          fill: "red",
-          stroke: "white",
-          "stroke-opacity": 0.7,
-        }).classed("d3-balls", true);    
+  var randomNumberX = function(){ return (Math.floor(Math.random() *  585)) + 10}
+  var randomNumberY = function(){ return (Math.floor(Math.random() *  590)) + 10}
+  var randomIndex = function(){ return (Math.floor(Math.random() * 400))}
+  var data = function(){
+    return [{
+      dx: 1,
+      dy: 1,
+      cx: randomNumberX(),
+      cy: randomNumberY(),
+      r: 10,
+      i: randomIndex() 
+    }]
+  };
 
-        balls.push(newElm);
-        console.log(balls);
-      }
+  var createElm = function(d) {
+    var self = this;
+    var elm = d3.select(this);
+    var newElm = board.append('circle').data(d).attr({
+      cx: function(d){ return d.cx },
+      cy: function(d){ return d.cy},
+      r: function(d){return d.r},
+      fill: "red",
+      stroke: "black",
+      "stroke-opacity": 0.7,
+    }).classed("d3-balls", true);    
 
-
-      function ticker () {
-          d3.selectAll(balls)
-            .each(transition);
-        
-        window.setTimeout(ticker, 5);
-      }
-      
-      function transition() {
-        var ball = this;
-        var dx = ball.data()[0].dx;
-        var dy = ball.data()[0].dy;
-        var x = parseInt(ball.attr("cx")) + dx;
-        var y = parseInt(ball.attr("cy")) + dy;
-        var r = parseInt(ball.attr("r"));
+    balls.push(newElm);
+  }
 
 
-        if (x <= r || x + r >= width) {
-          dx = -dx;
-        } 
+  function ticker () {
+      d3.selectAll(balls)
+        .each(transition);
+    
+    window.setTimeout(ticker, 5);
+  }
+  
+  function transition() {
+    var ball = this;
+    console.log(ball);
+    var dx = ball.data()[0].dx;
+    var dy = ball.data()[0].dy;
+    var x = parseInt(ball.attr("cx")) + dx;
+    var y = parseInt(ball.attr("cy")) + dy;
+    var r = parseInt(ball.attr("r"));
 
-        if (y <= r || y + r >= height) {
-          dy = -dy;
-        }
 
-        x += dx;
-        y += dy;
-     
-        ball.data([{dx: dx, dy: dy}]);
-        ball.attr("cx", x);
-        ball.attr("cy", y);
-        
-      }
+    if (x <= r || x + r >= width) {
+      dx = -dx;
+    } 
 
-      function init () {
-        createElm(data());
-        ticker();
-      }
+    if (y <= r || y + r >= height) {
+      dy = -dy;
+    }
 
-      // $('.addBalls').on('click', function(e){
-      //   e.preventDefault();
-      //   createElm(data());
-      // }
-      document.addEventListener('DOMContentLoaded', init);
+    x += dx;
+    y += dy;
+ 
+    ball.data([{dx: dx, dy: dy}]);
+    ball.attr("cx", x);
+    ball.attr("cy", y);
+    
+  }
+
+  function init () {
+    ticker();
+  }
+
+  // BALLS DATA
+   myDataRefBalls.on('child_added', function(snapshot) {
+     var ball = snapshot.val();
+     createElm([ball]);
+     // addPlayers(player.name, player.x, player.y, player.c);
+   });
+
+   // myDataRefBalls.on('child_changed', function(snapshot) {
+   //   var player = snapshot.val();
+   //   movePlayer(player.name, player.x, player.y);
+   // });
+
+   // myDataRefBalls.on('child_removed', function(oldChildSnapshot) {
+   //   var player = oldChildSnapshot.val();
+   //   deletePlayer(player.name);
+   // });
+
+  $('.addBalls').on('click', function(e){
+    e.preventDefault();
+    var ballData = data();
+    myDataRefBalls.child(ballData[0].i).set({dx: ballData[0].dx, dy: ballData[0].dy, cx: ballData[0].cx, cy: ballData[0].cy, r: ballData[0].r, i: ballData[0].i})
+  });
+
+  document.addEventListener('DOMContentLoaded', init);
 
 // ON CLOSE - REMOVE
   var removeDBChild = function(){
