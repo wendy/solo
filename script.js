@@ -39,7 +39,9 @@ var y = 0;
 $(function(){
 
   var myDataRef = new Firebase('https://firedodgeball.firebaseio.com/');
+  var myDataRefBalls = new Firebase('https://fireballs.firebaseio.com/');
 
+ // PLAYERS DATA
   myDataRef.on('child_added', function(snapshot) {
     console.log(snapshot.val())
     var player = snapshot.val();
@@ -77,6 +79,7 @@ $(function(){
     }
   })
 
+//ARROW KEYS FUNCTIONS
   d3.select("body")
     .on("keydown", function() {
       var key = d3.event.keyCode
@@ -115,31 +118,36 @@ $(function(){
 
     });
 
-
+  //BALLS
     'use strict';
       window.balls = [];
 
-      function createElm () {
-        var data = [{
-            dx: 1,
-            dy: 1,
-        }];
+      var randomNumber = function(){ return Math.floor(Math.random() * 40) * 15}
+      var data = function(){
+        return [{
+          dx: 1,
+          dy: 1,
+          cx: randomNumber(),
+          cy: randomNumber()
+        }]
+      };
+      console.log(data);
+      var createElm = function(d) {
         var self = this;
         var elm = d3.select(this);
-        var newElm = board.append('circle').data(data).attr({
-          cx: function(){ return width/2 },
-          cy: function(){ return height/2 },
+        var newElm = board.append('circle').data(d).attr({
+          cx: function(d){ return d.cx },
+          cy: function(d){ return d.cy},
           r: 10,
           fill: "red",
           stroke: "white",
           "stroke-opacity": 0.7,
         }).classed("d3-balls", true);    
-        
-        newElm.on("mouseover", createElm);
 
         balls.push(newElm);
         console.log(balls);
       }
+
 
       function ticker () {
           d3.selectAll(balls)
@@ -147,6 +155,7 @@ $(function(){
         
         window.setTimeout(ticker, 5);
       }
+      
       function transition() {
         var ball = this;
         var dx = ball.data()[0].dx;
@@ -174,11 +183,17 @@ $(function(){
       }
 
       function init () {
-        createElm();
+        createElm(data());
         ticker();
       }
 
+      // $('.addBalls').on('click', function(e){
+      //   e.preventDefault();
+      //   createElm(data());
+      // }
       document.addEventListener('DOMContentLoaded', init);
+
+// ON CLOSE - REMOVE
   var removeDBChild = function(){
     myDataRef.child(name).remove();
   }
