@@ -1,5 +1,7 @@
-var width = 800;
-var height = 300;
+var width = 795;
+var height = 600;
+var playerSize = 15;
+var madePlayer = false;
 
 var board = d3.select('#game')
   .append('svg')
@@ -18,8 +20,8 @@ var addPlayers = function(name, pX, pY, color){
     .attr({
       'x': pX,
       'y': pY,
-      'width': 20,
-      'height': 20,
+      'width': playerSize,
+      'height': playerSize,
       'fill': color,
       'opacity': .9
     })
@@ -39,9 +41,12 @@ $(function(){
   var myDataRef = new Firebase('https://firedodgeball.firebaseio.com/');
 
   myDataRef.on('child_added', function(snapshot) {
+    console.log(snapshot.val())
     var player = snapshot.val();
     addPlayers(player.name, player.x, player.y, player.c);
   });
+
+  myDataRef.child('balls').push({})
 
   myDataRef.on('child_changed', function(snapshot) {
     var player = snapshot.val();
@@ -65,34 +70,121 @@ $(function(){
 // ADD PLAYER: DB NAME AND ADD OBJECT 
   $('.button').on('click', function(e){
     e.preventDefault();
-    name = $('#name').val();
-    myDataRef.child(name).set({name: name, x: x, y: y, c: colorr })
+    if( madePlayer === false ){
+      name = $('#name').val();
+      myDataRef.child(name).set({name: name, x: x, y: y, c: colorr })
+      madePlayer = true;  
+    }
   })
 
   d3.select("body")
     .on("keydown", function() {
       var key = d3.event.keyCode
       if( key === 37 ){
-        x-= 10;
-        myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        x-= playerSize;
+        if(x < 0){
+          x+= playerSize;
+        } else {
+          myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        }
       }
       if( key === 39 ){
-        x+= 10;
-        myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        x+= playerSize;
+        if(x > width - playerSize){
+          x-= playerSize;
+        } else {
+          myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        }
       }
       if( key === 38 ){
-        y-= 10;
-        myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        y-= playerSize;
+        if(y < 0){
+          y+= playerSize;
+        } else {
+          myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        }
       }
       if( key === 40 ){
-        y+= 10;
-        myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        y+= playerSize;
+        if(y > height - playerSize){
+          y-= playerSize;
+        } else {
+          myDataRef.child(name).set({name: name, x: x, y: y, c: colorr});
+        }
       }      
 
     });
 
-  window.onbeforeunload = function() {
+
+    'use strict';
+      window.balls = [];
+
+      function createElm () {
+        var data = [{
+            dx: 1,
+            dy: 1,
+        }];
+        var self = this;
+        var elm = d3.select(this);
+        var newElm = board.append('circle').data(data).attr({
+          cx: function(){ return width/2 },
+          cy: function(){ return height/2 },
+          r: 10,
+          fill: "red",
+          stroke: "white",
+          "stroke-opacity": 0.7,
+        }).classed("d3-balls", true);    
+        
+        newElm.on("mouseover", createElm);
+
+        balls.push(newElm);
+        console.log(balls);
+      }
+
+      function ticker () {
+          d3.selectAll(balls)
+            .each(transition);
+        
+        window.setTimeout(ticker, 5);
+      }
+      function transition() {
+        var ball = this;
+        var dx = ball.data()[0].dx;
+        var dy = ball.data()[0].dy;
+        var x = parseInt(ball.attr("cx")) + dx;
+        var y = parseInt(ball.attr("cy")) + dy;
+        var r = parseInt(ball.attr("r"));
+
+
+        if (x <= r || x + r >= width) {
+          dx = -dx;
+        } 
+
+        if (y <= r || y + r >= height) {
+          dy = -dy;
+        }
+
+        x += dx;
+        y += dy;
+     
+        ball.data([{dx: dx, dy: dy}]);
+        ball.attr("cx", x);
+        ball.attr("cy", y);
+        
+      }
+
+      function init () {
+        createElm();
+        ticker();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+  var removeDBChild = function(){
     myDataRef.child(name).remove();
   }
+  window.onbeforeunload = function(){
+    removeDBChild();
+  }
+
 }())
 
