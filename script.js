@@ -119,9 +119,9 @@ $(function(){
 'use strict';
   window.balls = [];
 
+  var randomNumberI = function(){return (Math.floor(Math.random() * 400))}
   var randomNumberX = function(){ return (Math.floor(Math.random() *  585)) + 10}
   var randomNumberY = function(){ return (Math.floor(Math.random() *  590)) + 10}
-  var randomIndex = function(){ return (Math.floor(Math.random() * 400))}
   var data = function(){
     return [{
       dx: 1,
@@ -129,14 +129,16 @@ $(function(){
       cx: randomNumberX(),
       cy: randomNumberY(),
       r: 10,
-      i: randomIndex() 
+      i: "b" + randomNumberI()
     }]
   };
 
   var createElm = function(d) {
     var self = this;
     var elm = d3.select(this);
-    var newElm = board.append('circle').data(d).attr({
+    var newElm = board.append('circle').data(d)
+    .attr('id', function(d){ return d.i})
+    .attr({
       cx: function(d){ return d.cx },
       cy: function(d){ return d.cy},
       r: function(d){return d.r},
@@ -158,7 +160,6 @@ $(function(){
   
   function transition() {
     var ball = this;
-    console.log(ball);
     var dx = ball.data()[0].dx;
     var dy = ball.data()[0].dy;
     var x = parseInt(ball.attr("cx")) + dx;
@@ -191,24 +192,28 @@ $(function(){
    myDataRefBalls.on('child_added', function(snapshot) {
      var ball = snapshot.val();
      createElm([ball]);
-     // addPlayers(player.name, player.x, player.y, player.c);
    });
 
-   // myDataRefBalls.on('child_changed', function(snapshot) {
-   //   var player = snapshot.val();
-   //   movePlayer(player.name, player.x, player.y);
-   // });
+   myDataRefBalls.on('child_removed', function(oldChildSnapshot) {
+     var ball = oldChildSnapshot.val();
+     d3.select('#' + ball.i).remove();
 
-   // myDataRefBalls.on('child_removed', function(oldChildSnapshot) {
-   //   var player = oldChildSnapshot.val();
-   //   deletePlayer(player.name);
-   // });
+   });
 
   $('.addBalls').on('click', function(e){
     e.preventDefault();
-    var ballData = data();
-    myDataRefBalls.child(ballData[0].i).set({dx: ballData[0].dx, dy: ballData[0].dy, cx: ballData[0].cx, cy: ballData[0].cy, r: ballData[0].r, i: ballData[0].i})
+    if( balls.length < 11 ){
+      var ballData = data();
+      myDataRefBalls.child(ballData[0].i).set({dx: ballData[0].dx, dy: ballData[0].dy, cx: ballData[0].cx, cy: ballData[0].cy, r: ballData[0].r, i: ballData[0].i})
+    }
   });
+
+  $('.deleteBalls').on('click', function(e){
+    e.preventDefault();
+    var deleteBall = balls.splice( 0, 1)
+    myDataRefBalls.child(deleteBall[0][0][0].id).remove();
+  });
+
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -220,5 +225,8 @@ $(function(){
     removeDBChild();
   }
 
+  window.removeAllBalls = function(){
+    myDataRefBalls.remove();
+  }
 }())
 
