@@ -1,6 +1,6 @@
 var width = 795;
 var height = 600;
-var playerSize = 15;
+var playerSize = 20;
 var madePlayer = false;
 
 var board = d3.select('#game')
@@ -32,8 +32,8 @@ var color = d3.scale.category10()
 
 var name; 
 var colorr = color(Math.floor(Math.random() * 40));
-var x = 0;
-var y = 0;
+var x = -1;
+var y = -1;
 
 
 $(function(){
@@ -71,7 +71,7 @@ $(function(){
     e.preventDefault();
     if( madePlayer === false ){
       name = $('#name').val();
-      myDataRef.child(name).set({name: name, x: x, y: y, c: colorr })
+      myDataRef.child(name).set({name: name, x: 0, y: 0, c: colorr })
       madePlayer = true;  
     }
   })
@@ -195,6 +195,7 @@ $(function(){
    });
 
    myDataRefBalls.on('child_removed', function(oldChildSnapshot) {
+     balls.splice( 0, 1)
      var ball = oldChildSnapshot.val();
      d3.select('#' + ball.i).remove();
 
@@ -202,31 +203,61 @@ $(function(){
 
   $('.addBalls').on('click', function(e){
     e.preventDefault();
-    if( balls.length < 11 ){
+
       var ballData = data();
-      myDataRefBalls.child(ballData[0].i).set({dx: ballData[0].dx, dy: ballData[0].dy, cx: ballData[0].cx, cy: ballData[0].cy, r: ballData[0].r, i: ballData[0].i})
-    }
+      myDataRefBalls.child(ballData[0].i).set({dx: ballData[0].dx, dy: ballData[0].dy, cx: ballData[0].cx, cy: ballData[0].cy, r: ballData[0].r, i: ballData[0].i});
   });
 
   $('.deleteBalls').on('click', function(e){
     e.preventDefault();
-    var deleteBall = balls.splice( 0, 1)
-    myDataRefBalls.child(deleteBall[0][0][0].id).remove();
+    var deleteBall = balls[0]
+    myDataRefBalls.child(deleteBall[0][0].id).remove();
   });
 
 
   document.addEventListener('DOMContentLoaded', init);
 
-// ON CLOSE - REMOVE
-  var removeDBChild = function(){
-    myDataRef.child(name).remove();
-  }
-  window.onbeforeunload = function(){
-    removeDBChild();
-  }
+  // ON CLOSE - REMOVE
+    var removeDBChild = function(){
+      myDataRef.child(name).remove();
+    }
+    window.onbeforeunload = function(){
+      removeDBChild();
+    }
 
-  window.removeAllBalls = function(){
-    myDataRefBalls.remove();
-  }
+    window.removeAllBalls = function(){
+      myDataRefBalls.remove();
+    }
+
+  var each = function(array, func){
+    for(var i = 0; i < array.length; i++){
+      func(array[i]);
+    }
+  };
+
+  var detectCollisions = function(){
+
+    var collision = false;
+
+    each(balls, function(ball){
+      var cx = ball[0][0].cx.animVal.value;
+      var cy = ball[0][0].cy.animVal.value;
+      // the magic of collision detection
+      var mx = cx - x - playerSize/2;
+      var my = cy - y - playerSize/2;
+      if( Math.sqrt(mx*mx + my*my) < playerSize ){
+        collision = true;
+      }
+    });
+
+    if(collision) {
+      removeDBChild();
+      x = -1;
+      y = -1;
+      alert("You lost! Refresh to play again!")
+
+    }
+  };
+
+  d3.timer(detectCollisions);
 }())
-
