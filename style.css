@@ -1,1 +1,5 @@
-style.css
+.board {
+  display: inline-block;
+  border: 3px solid black;
+}
+
